@@ -3,8 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>World Cup 2026 Simulator</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8981424970194747" crossorigin="anonymous"></script>
+<title>World Cup 2026 Simulator — Predict All 104 Matches</title>
+<meta name="description" content="Free World Cup 2026 simulator. Predict all 104 matches, fill in group standings, auto-populate the knockout bracket and crown your champion for USA · Mexico · Canada.">
+<link rel="canonical" href="https://worldcupsim2026.com/">
+<meta property="og:title" content="World Cup 2026 Simulator — Predict All 104 Matches">
+<meta property="og:description" content="Predict every match of FIFA World Cup 2026. Interactive bracket for USA · Mexico · Canada.">
+<meta property="og:url" content="https://worldcupsim2026.com/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"World Cup 2026 Simulator","url":"https://worldcupsim2026.com/","applicationCategory":"SportsApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Interactive match-by-match simulator for the FIFA World Cup 2026 in the USA, Mexico and Canada.","publisher":{"@type":"Organization","name":"worldcupsim2026.com","url":"https://worldcupsim2026.com/"}}</script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8938142437019474" crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-8938142437019474">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-26XREGX7RE"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-26XREGX7RE');</script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -252,16 +261,37 @@ else if(tab==='final'){let h=`<div class="ph">🥉 Third Place</div>`;const t3=k
 render();
 </script>
 <footer style="border-top:1px solid var(--border);margin-top:40px;padding:30px 20px;text-align:center;position:relative;z-index:1">
-  <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+  <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:16px">
     <a href="index.html" style="color:var(--jade);text-decoration:none;font-size:.82rem;font-weight:500">Simulator</a>
     <a href="blog.html" style="color:var(--text-dim);text-decoration:none;font-size:.82rem">Blog</a>
     <a href="about.html" style="color:var(--text-dim);text-decoration:none;font-size:.82rem">About</a>
-    <a href="privacy.html" style="color:var(--text-dim);text-decoration:none;font-size:.82rem">Privacy Policy</a>
+    <a href="contact.html" style="color:var(--text-dim);text-decoration:none;font-size:.82rem">Contact</a>
+    <a href="privacy.html" style="color:var(--text-dim);text-decoration:none;font-size:.82rem">Privacy</a>
+    <a href="terms.html" style="color:var(--text-dim);text-decoration:none;font-size:.82rem">Terms</a>
+    <a href="cookies.html" style="color:var(--text-dim);text-decoration:none;font-size:.82rem">Cookies</a>
   </div>
   <p style="color:var(--text-dim);font-size:.7rem;max-width:600px;margin:0 auto;line-height:1.5">This site is not affiliated with, endorsed by, or connected to FIFA, the FIFA World Cup 2026™, or any national football federation. All trademarks belong to their respective owners. This is an independent fan-made simulator for entertainment purposes only.</p>
   <p style="color:var(--border);font-size:.65rem;margin-top:10px">© 2026 worldcupsim2026.com</p>
 </footer>
-<!-- ADSENSE: Paste your AdSense script tag below this line after approval -->
-<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXX" crossorigin="anonymous"></script> -->
+<div id="wc26-consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:10000;background:#0a0e17;border-top:2px solid #00B289;padding:16px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.6);font-family:'DM Sans',sans-serif;color:#e8e8e8">
+  <div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center">
+    <p style="flex:1;min-width:240px;font-size:.82rem;line-height:1.5;color:#c0c8d0;margin:0">🍪 We use cookies for analytics and to serve ads via Google AdSense. See our <a href="cookies.html" style="color:#00B289">Cookie Policy</a> and <a href="privacy.html" style="color:#00B289">Privacy Policy</a>.</p>
+    <button onclick="wc26Consent('reject')" style="padding:8px 16px;border:1px solid #334155;background:transparent;color:#c0c8d0;border-radius:6px;font-size:.8rem;font-weight:500;cursor:pointer">Reject</button>
+    <button onclick="wc26Consent('accept')" style="padding:8px 18px;border:none;background:#00B289;color:#000;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer">Accept</button>
+  </div>
+</div>
+<script>
+(function(){
+  try{
+    var c=localStorage.getItem('wc26_consent');
+    if(!c){document.getElementById('wc26-consent').style.display='block';}
+  }catch(e){}
+})();
+function wc26Consent(v){
+  try{localStorage.setItem('wc26_consent',v);}catch(e){}
+  document.getElementById('wc26-consent').style.display='none';
+  if(v==='reject'&&window.gtag){window['ga-disable-G-26XREGX7RE']=true;}
+}
+</script>
 </body>
 </html>
