@@ -4,9 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About — World Cup 2026 Simulator</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8981424970194747" crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8938142437019474" crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-8938142437019474">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-26XREGX7RE"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-26XREGX7RE');</script>
 <meta name="description" content="Learn about the World Cup 2026 Simulator — a free, fan-made match-by-match prediction tool for the FIFA World Cup 2026 in USA, Mexico and Canada.">
+<link rel="canonical" href="https://worldcupsim2026.com/about.html">
+<meta property="og:title" content="About — World Cup 2026 Simulator">
+<meta property="og:description" content="Independent fan-made simulator for the FIFA World Cup 2026.">
+<meta property="og:url" content="https://worldcupsim2026.com/about.html">
+<meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--jade:#00B289;--gold:#D4AF37;--bg:#0a0e17;--card:#111827;--text:#e8e8e8;--text-dim:#8899aa;--border:#1e293b}
@@ -41,7 +47,9 @@ footer .copy{color:var(--border);font-size:.65rem;margin-top:10px}
   <a href="index.html">Simulator</a>
   <a href="blog.html">Blog</a>
   <a href="about.html" class="on">About</a>
-  <a href="privacy.html">Privacy Policy</a>
+  <a href="contact.html">Contact</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="terms.html">Terms</a>
 </nav>
 <div class="wrap">
   <h2>What is This?</h2>
@@ -83,10 +91,24 @@ footer .copy{color:var(--border);font-size:.65rem;margin-top:10px}
     <a href="index.html">Simulator</a>
     <a href="blog.html">Blog</a>
     <a href="about.html">About</a>
-    <a href="privacy.html">Privacy Policy</a>
+    <a href="contact.html">Contact</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="cookies.html">Cookies</a>
   </div>
   <p class="disc">This site is not affiliated with, endorsed by, or connected to FIFA, the FIFA World Cup 2026™, or any national football federation. All trademarks belong to their respective owners.</p>
   <p class="copy">© 2026 worldcupsim2026.com</p>
 </footer>
+<div id="wc26-consent" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:10000;background:#0a0e17;border-top:2px solid #00B289;padding:16px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.6);font-family:'DM Sans',sans-serif;color:#e8e8e8">
+  <div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center">
+    <p style="flex:1;min-width:240px;font-size:.82rem;line-height:1.5;color:#c0c8d0;margin:0">🍪 We use cookies for analytics and to serve ads via Google AdSense. See our <a href="cookies.html" style="color:#00B289">Cookie Policy</a> and <a href="privacy.html" style="color:#00B289">Privacy Policy</a>.</p>
+    <button onclick="wc26Consent('reject')" style="padding:8px 16px;border:1px solid #334155;background:transparent;color:#c0c8d0;border-radius:6px;font-size:.8rem;font-weight:500;cursor:pointer">Reject</button>
+    <button onclick="wc26Consent('accept')" style="padding:8px 18px;border:none;background:#00B289;color:#000;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer">Accept</button>
+  </div>
+</div>
+<script>
+(function(){try{var c=localStorage.getItem('wc26_consent');if(!c){document.getElementById('wc26-consent').style.display='block';}}catch(e){}})();
+function wc26Consent(v){try{localStorage.setItem('wc26_consent',v);}catch(e){}document.getElementById('wc26-consent').style.display='none';if(v==='reject'&&window.gtag){window['ga-disable-G-26XREGX7RE']=true;}}
+</script>
 </body>
 </html>
