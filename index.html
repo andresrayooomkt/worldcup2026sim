@@ -17,7 +17,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-26XREGX7RE"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-26XREGX7RE');</script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--jade:#00B289;--jade-dark:#009974;--gold:#D4AF37;--bg:#0a0e17;--card:#111827;--card-hover:#1a2332;--text:#e8e8e8;--text-dim:#8899aa;--border:#1e293b;--win:#22c55e;--draw:#f59e0b;--loss:#ef4444;--mexico:#006341;--usa:#002868;--canada:#FF0000}
+:root{--jade:#00B289;--jade-dark:#009974;--gold:#D4AF37;--blue:#3b82f6;--bg:#0a0e17;--card:#111827;--card-hover:#1a2332;--text:#e8e8e8;--text-dim:#8899aa;--border:#1e293b;--win:#22c55e;--draw:#f59e0b;--loss:#ef4444;--mexico:#006341;--usa:#002868;--canada:#FF0000}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 .noise{position:fixed;top:0;left:0;width:100%;height:100%;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
@@ -32,7 +32,7 @@ nav::-webkit-scrollbar{height:0}
 .tb:hover{border-color:var(--jade);color:var(--text)}.tb.on{background:var(--jade);border-color:var(--jade);color:#000;font-weight:700}
 .bar{display:flex;justify-content:center;gap:10px;padding:14px 16px;flex-wrap:wrap}
 .bbtn{padding:9px 20px;border:2px solid var(--gold);border-radius:8px;background:0;color:var(--gold);font-family:'DM Sans',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:1px}
-.bbtn:hover{background:var(--gold);color:#000;transform:translateY(-1px)}.bbtn.r{border-color:var(--loss);color:var(--loss)}.bbtn.r:hover{background:var(--loss);color:#fff}
+.bbtn:hover{background:var(--gold);color:#000;transform:translateY(-1px)}.bbtn.r{border-color:var(--loss);color:var(--loss)}.bbtn.r:hover{background:var(--loss);color:#fff}.bbtn.b{border-color:var(--blue);color:var(--blue)}.bbtn.b:hover{background:var(--blue);color:#fff}.bbtn:disabled{opacity:.6;cursor:wait}
 .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:10px 0}
 .si{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;min-width:80px}
 .si .n{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--jade);font-weight:900}.si .l{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
@@ -40,7 +40,7 @@ nav::-webkit-scrollbar{height:0}
 .ph{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--jade);padding:22px 0 10px;border-bottom:1px solid var(--border);margin-bottom:14px}
 .gl{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold);padding:14px 0 6px}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:9px;transition:all .2s;position:relative}
-.mc:hover{border-color:var(--jade);background:var(--card-hover)}.mc.sim{border-left:3px solid var(--jade)}.mc.man{border-left:3px solid var(--gold)}
+.mc:hover{border-color:var(--jade);background:var(--card-hover)}.mc.sim{border-left:3px solid var(--jade)}.mc.man{border-left:3px solid var(--gold)}.mc.real{border-left:3px solid var(--blue)}
 .mm{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:3px}
 .mn{font-size:.68rem;color:var(--jade);font-weight:700;letter-spacing:1px;text-transform:uppercase}.md{font-size:.73rem;color:var(--text-dim)}
 .mv{font-size:.7rem;color:var(--text-dim);width:100%;margin-top:1px}
@@ -102,6 +102,7 @@ nav::-webkit-scrollbar{height:0}
 <nav id="tabs"></nav>
 <div class="bar">
   <button class="bbtn" onclick="simAll()">🎲 Simulate All</button>
+  <button class="bbtn b" id="realBtn" onclick="loadReal()">📡 Cargar Resultados Reales</button>
   <button class="bbtn" onclick="simPhase()">▶ Current Phase</button>
   <button class="bbtn r" onclick="resetAll()">↺ Reset</button>
 </div>
@@ -194,6 +195,48 @@ const SF=[{n:101,d:"Jul 14",t:"6:00 PM",v:"AT&T Stadium",c:"Dallas",p:"US",desc:
 const TH={n:103,d:"Jul 18",t:"4:00 PM",v:"Hard Rock Stadium",c:"Miami",p:"US",desc:"3rd Place"};
 const FI={n:104,d:"Jul 19",t:"4:00 PM",v:"MetLife Stadium",c:"New York/NJ",p:"US",desc:"FINAL"};
 let res={},tab="groups",pendPen={};
+// === LIVE RESULTS (openfootball, no API key) ===
+const REAL_URL="https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
+// openfootball name -> my sim name (only the ones that differ; identical names need no entry)
+const NAMEMAP={"Czech Republic":"Czechia","Bosnia & Herzegovina":"Bosnia","Bosnia and Herzegovina":"Bosnia","Turkey":"Türkiye","Türkiye":"Türkiye","Cabo Verde":"Cape Verde","Curacao":"Curaçao","Korea Republic":"South Korea","United States":"USA","Côte d'Ivoire":"Ivory Coast","Congo DR":"DR Congo"};
+// normalize so diacritics / casing / punctuation never break a match (Türkiye≈Turkiye, Curaçao≈Curacao)
+const normT=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const toSim=n=>NAMEMAP[n]||n;
+// build a lookup of my group matches keyed by the unordered pair of teams
+function gmIndex(){const ix={};GM.forEach(m=>{ix[[normT(m.h),normT(m.a)].sort().join('|')]=m;});return ix;}
+async function loadReal(){
+  const btn=document.getElementById('realBtn'),lbl=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ Cargando…';}
+  try{
+    const r=await fetch(REAL_URL,{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const matches=(data&&data.matches)||[];
+    const ix=gmIndex();let loaded=0,unmatched=[];
+    matches.forEach(m=>{
+      const ft=m.score&&m.score.ft;                         // 3) solo partidos con marcador final
+      if(!ft||ft.length<2||ft[0]==null||ft[1]==null)return;
+      const t1=toSim(m.team1),t2=toSim(m.team2);
+      if(!t1||!t2)return;
+      const gm=ix[[normT(t1),normT(t2)].sort().join('|')];   // 2) buscar en GM por los dos equipos
+      if(!gm){if(m.group)unmatched.push((m.team1||'?')+' vs '+(m.team2||'?'));return;}
+      // 1)+respeta orientación home/away de MI calendario (GM), no la de openfootball
+      const hg=normT(gm.h)===normT(t1)?ft[0]:ft[1];
+      const ag=normT(gm.a)===normT(t1)?ft[0]:ft[1];
+      res[gm.n]={hg,ag,real:true};                           // 4) marcar como real
+      loaded++;
+    });
+    render();
+    if(btn){btn.textContent=loaded?('✓ '+loaded+' reales'):'Sin partidos jugados aún';setTimeout(()=>{btn.textContent=lbl;},2600);}
+    if(unmatched.length)console.warn('No mapeados ('+unmatched.length+'):',unmatched);
+  }catch(e){                                                 // 5) manejo de errores
+    console.error('loadReal:',e);
+    if(btn)btn.textContent='⚠️ Error al cargar';
+    setTimeout(()=>{if(btn)btn.textContent=lbl;},2600);
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
 function sim(h,a,ko=false){const hs=T[h]||60,as=T[a]||60,hS=hs+Math.random()*15+5,aS=as+Math.random()*15;let hg=Math.max(0,Math.round((hS/30-1)+(Math.random()-.3)*2)),ag=Math.max(0,Math.round((aS/30-1)+(Math.random()-.3)*2));if(ko&&hg===ag)return{hg,ag,pen:Math.random()>.5?'h':'a'};return{hg,ag};}
 function simN(n){const gm=GM.find(m=>m.n===n);if(gm){res[n]=sim(gm.h,gm.a);render();return;}simKO(n);render();}
 function grpSt(g){const ts=G[g].map(t=>({name:t,pts:0,gf:0,ga:0,gd:0,w:0,d:0,l:0,pl:0}));const mp={};ts.forEach(t=>mp[t.name]=t);GM.filter(m=>m.g===g).forEach(m=>{const r=res[m.n];if(!r)return;const h=mp[m.h],a=mp[m.a];h.gf+=r.hg;h.ga+=r.ag;h.pl++;a.gf+=r.ag;a.ga+=r.hg;a.pl++;if(r.hg>r.ag){h.pts+=3;h.w++;a.l++;}else if(r.hg<r.ag){a.pts+=3;a.w++;h.l++;}else{h.pts++;a.pts++;h.d++;a.d++;}});ts.forEach(t=>t.gd=t.gf-t.ga);ts.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);return ts;}
@@ -243,7 +286,7 @@ function copyShare(text){
 // === RENDER ===
 function tmH(name,right=false){const f=fi(name);if(right)return`<div class="tm r">${name} ${f}</div>`;return`<div class="tm">${f} ${name}</div>`;}
 function vfC(p){return p==='MX'?'vfm':p==='CA'?'vfc':'vfu';}
-function mcH(m,hT,aT,ko=false){const r=res[m.n],iM=r&&r.manual;let vs;if(r){let s=`${r.hg} - ${r.ag}`;if(r.pen)s+=` <span class="pen-tag">(PEN)</span>`;vs=`<div class="vb"><div class="sc">${s}</div></div>`;}else vs=`<div class="vb"><div class="vs">vs</div></div>`;const can=hT!=="TBD"&&aT!=="TBD";let act='';if(!r&&can){act=`<div class="acts"><div class="sig"><input type="number" min="0" max="20" placeholder="0" class="sinp" id="hg-${m.n}" onkeydown="if(event.key==='Enter')confirmSc(${m.n},${ko})"><span class="sep">—</span><input type="number" min="0" max="20" placeholder="0" class="sinp" id="ag-${m.n}" onkeydown="if(event.key==='Enter')confirmSc(${m.n},${ko})"><button class="bc" onclick="confirmSc(${m.n},${ko})">✓</button></div><button class="bd" onclick="simN(${m.n})">🎲</button></div>${ko?`<div class="psel hid" id="pen-${m.n}"><span>⚠️ Draw → Penalties:</span><button class="pb" onclick="setPen(${m.n},'h')">${fi(hT)} ${hT}</button><button class="pb" onclick="setPen(${m.n},'a')">${fi(aT)} ${aT}</button></div>`:''}`;}else if(r&&can){act=`<div style="text-align:center"><button class="be" onclick="editM(${m.n})">✏️ Edit</button> <button class="sh" onclick="shareMatch('${hT}','${aT}',${r.hg},${r.ag},${r.pen?`'${r.pen}'`:'null'})">📤 Share</button></div>`;}const cls=r?(iM?'man':'sim'):'';const tag=iM?'<span style="color:var(--gold);font-size:.58rem"> MANUAL</span>':(r?'<span style="color:var(--jade);font-size:.58rem"> SIM</span>':'');return`<div class="mc ${cls}"><div class="mm"><span class="mn">M${m.n}${tag}</span><span class="md">${m.d} · ${m.t}</span><span class="mv"><span class="vf ${vfC(m.p)}"></span>${m.v}, ${m.c}</span></div><div class="mt">${tmH(hT)}${vs}${tmH(aT,true)}</div>${act}</div>`;}
+function mcH(m,hT,aT,ko=false){const r=res[m.n],iM=r&&r.manual,iR=r&&r.real;let vs;if(r){let s=`${r.hg} - ${r.ag}`;if(r.pen)s+=` <span class="pen-tag">(PEN)</span>`;vs=`<div class="vb"><div class="sc">${s}</div></div>`;}else vs=`<div class="vb"><div class="vs">vs</div></div>`;const can=hT!=="TBD"&&aT!=="TBD";let act='';if(!r&&can){act=`<div class="acts"><div class="sig"><input type="number" min="0" max="20" placeholder="0" class="sinp" id="hg-${m.n}" onkeydown="if(event.key==='Enter')confirmSc(${m.n},${ko})"><span class="sep">—</span><input type="number" min="0" max="20" placeholder="0" class="sinp" id="ag-${m.n}" onkeydown="if(event.key==='Enter')confirmSc(${m.n},${ko})"><button class="bc" onclick="confirmSc(${m.n},${ko})">✓</button></div><button class="bd" onclick="simN(${m.n})">🎲</button></div>${ko?`<div class="psel hid" id="pen-${m.n}"><span>⚠️ Draw → Penalties:</span><button class="pb" onclick="setPen(${m.n},'h')">${fi(hT)} ${hT}</button><button class="pb" onclick="setPen(${m.n},'a')">${fi(aT)} ${aT}</button></div>`:''}`;}else if(r&&can){act=`<div style="text-align:center"><button class="be" onclick="editM(${m.n})">✏️ Edit</button> <button class="sh" onclick="shareMatch('${hT}','${aT}',${r.hg},${r.ag},${r.pen?`'${r.pen}'`:'null'})">📤 Share</button></div>`;}const cls=r?(iR?'real':(iM?'man':'sim')):'';const tag=iR?'<span style="color:var(--blue);font-size:.58rem"> REAL</span>':(iM?'<span style="color:var(--gold);font-size:.58rem"> MANUAL</span>':(r?'<span style="color:var(--jade);font-size:.58rem"> SIM</span>':''));return`<div class="mc ${cls}"><div class="mm"><span class="mn">M${m.n}${tag}</span><span class="md">${m.d} · ${m.t}</span><span class="mv"><span class="vf ${vfC(m.p)}"></span>${m.v}, ${m.c}</span></div><div class="mt">${tmH(hT)}${vs}${tmH(aT,true)}</div>${act}</div>`;}
 function stH(g){const s=grpSt(g);let h=`<table class="st"><tr><th></th><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr>`;s.forEach((t,i)=>{const c=i<2?'q':(i===2?'t':'e');h+=`<tr class="${c}"><td class="p">${i+1}</td><td>${fi(t.name)} ${t.name}</td><td>${t.pl}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td>${t.gf}</td><td>${t.ga}</td><td>${t.gd>0?'+':''}${t.gd}</td><td><strong>${t.pts}</strong></td></tr>`;});return h+'</table>';}
 function bsH(n,mList){const m=mList.find(x=>x.n===n);if(!m)return'';let ts;if(n>=73&&n<=88)ts=r32T(n);else ts=koPair(n);const r=res[n],w=r?W(n):null;return`<div class="bs ${r?'w':''}"><div style="flex:1"><div style="display:flex;align-items:center;gap:5px;font-size:.82rem;${w===ts[0]?'color:var(--win);font-weight:700':''}">${fi(ts[0])} ${ts[0]} ${r?`<strong>${r.hg}</strong>`:''}</div><div style="display:flex;align-items:center;gap:5px;font-size:.82rem;margin-top:4px;${w===ts[1]?'color:var(--win);font-weight:700':''}">${fi(ts[1])} ${ts[1]} ${r?`<strong>${r.ag}</strong>`:''}</div>${r&&r.pen?`<div class="pen-tag" style="margin-top:2px">PEN → ${fi(w)} ${w}</div>`:''}</div><div style="font-size:.63rem;color:var(--text-dim);text-align:right">${m.d}<br>${m.c}</div></div>`;}
 function qBanner(){const allDone=Object.keys(G).every(g=>GM.filter(m=>m.g===g).every(m=>res[m.n]));if(!allDone)return'';const q=[];Object.keys(G).forEach(g=>{const s=grpSt(g);q.push(s[0].name,s[1].name);});allThirds().forEach(t=>q.push(t.name));return`<div class="q-banner"><h3>🎫 32 Qualified for Knockout Stage</h3><div class="q-teams">${q.map(t=>`<div class="q-chip">${fi(t)} ${t}</div>`).join('')}</div></div>`;}
