@@ -194,7 +194,7 @@ const QF=[{n:97,d:"Jul 9",t:"5:00 PM",v:"Gillette Stadium",c:"Boston",p:"US",des
 const SF=[{n:101,d:"Jul 14",t:"6:00 PM",v:"AT&T Stadium",c:"Dallas",p:"US",desc:"SF 1"},{n:102,d:"Jul 15",t:"3:00 PM",v:"Mercedes-Benz",c:"Atlanta",p:"US",desc:"SF 2"}];
 const TH={n:103,d:"Jul 18",t:"4:00 PM",v:"Hard Rock Stadium",c:"Miami",p:"US",desc:"3rd Place"};
 const FI={n:104,d:"Jul 19",t:"4:00 PM",v:"MetLife Stadium",c:"New York/NJ",p:"US",desc:"FINAL"};
-let res={},tab="groups",pendPen={};
+let res={},tab="groups",pendPen={},realKO={};
 // === LIVE RESULTS (openfootball, no API key) ===
 const REAL_URL="https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
 // openfootball name -> my sim name (only the ones that differ; identical names need no entry)
@@ -213,7 +213,26 @@ async function loadReal(){
     const data=await r.json();
     const matches=(data&&data.matches)||[];
     const ix=gmIndex();let loaded=0,unmatched=[];
+    const isPH=s=>/^[WL]\d+$/.test((s||'').trim());          // placeholder openfootball (W74, L101)
     matches.forEach(m=>{
+      // ===== KNOCKOUT: se unen por num (73-104), no por nombre. Grupos no tienen num. =====
+      if(m.num){
+        if(isPH(m.team1)||isPH(m.team2))return;              // equipos aún no definidos en la realidad
+        const h=toSim(m.team1),a=toSim(m.team2);
+        if(!h||!a)return;
+        realKO[m.num]={h,a};                                 // override de equipos reales (orienta home/away a team1/team2)
+        const sc=m.score||{};let base=null,pen=null;
+        if(sc.p&&sc.p.length===2){base=sc.ft;pen=sc.p[0]>sc.p[1]?'h':'a';}   // penales: empate ft + ganador por p[]
+        else if(sc.et&&sc.et.length===2)base=sc.et;          // decidido en prórroga
+        else if(sc.ft&&sc.ft.length===2)base=sc.ft;          // tiempo reglamentario
+        if(base&&base[0]!=null&&base[1]!=null){
+          realKO[m.num].hg=base[0];realKO[m.num].ag=base[1];if(pen)realKO[m.num].pen=pen;
+          res[m.num]={hg:base[0],ag:base[1],real:true};if(pen)res[m.num].pen=pen;
+          loaded++;
+        }
+        return;
+      }
+      // ===== GRUPOS (sin cambios): se unen por nombre de equipo =====
       const ft=m.score&&m.score.ft;                         // 3) solo partidos con marcador final
       if(!ft||ft.length<2||ft[0]==null||ft[1]==null)return;
       const t1=toSim(m.team1),t2=toSim(m.team2);
@@ -226,6 +245,8 @@ async function loadReal(){
       res[gm.n]={hg,ag,real:true};                           // 4) marcar como real
       loaded++;
     });
+    // bracket cambió: descarta KO sim/manual viejos (basados en cruces erróneos); conserva los reales
+    for(let k=73;k<=104;k++){if(res[k]&&!res[k].real)delete res[k];}
     render();
     if(btn){btn.textContent=loaded?('✓ '+loaded+' reales'):'Sin partidos jugados aún';setTimeout(()=>{btn.textContent=lbl;},2600);}
     if(unmatched.length)console.warn('No mapeados ('+unmatched.length+'):',unmatched);
@@ -241,15 +262,15 @@ function sim(h,a,ko=false){const hs=T[h]||60,as=T[a]||60,hS=hs+Math.random()*15+
 function simN(n){const gm=GM.find(m=>m.n===n);if(gm){res[n]=sim(gm.h,gm.a);render();return;}simKO(n);render();}
 function grpSt(g){const ts=G[g].map(t=>({name:t,pts:0,gf:0,ga:0,gd:0,w:0,d:0,l:0,pl:0}));const mp={};ts.forEach(t=>mp[t.name]=t);GM.filter(m=>m.g===g).forEach(m=>{const r=res[m.n];if(!r)return;const h=mp[m.h],a=mp[m.a];h.gf+=r.hg;h.ga+=r.ag;h.pl++;a.gf+=r.ag;a.ga+=r.hg;a.pl++;if(r.hg>r.ag){h.pts+=3;h.w++;a.l++;}else if(r.hg<r.ag){a.pts+=3;a.w++;h.l++;}else{h.pts++;a.pts++;h.d++;a.d++;}});ts.forEach(t=>t.gd=t.gf-t.ga);ts.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);return ts;}
 function allThirds(){const th=[];Object.keys(G).forEach(g=>{const s=grpSt(g);if(s[2]&&s[2].pl===3)th.push({...s[2],grp:g});});th.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);return th.slice(0,8);}
-function r32T(n){const ths=allThirds(),tn=ths.map(t=>t.name),gp=(g,p)=>{const s=grpSt(g);return s[p]?s[p].name:"TBD";};const map={73:[()=>gp('A',1),()=>gp('B',1)],74:[()=>gp('E',0),()=>tn[0]||"TBD"],75:[()=>gp('F',0),()=>gp('C',1)],76:[()=>gp('C',0),()=>gp('F',1)],77:[()=>gp('I',0),()=>tn[1]||"TBD"],78:[()=>gp('E',1),()=>gp('I',1)],79:[()=>gp('A',0),()=>tn[2]||"TBD"],80:[()=>gp('L',0),()=>tn[3]||"TBD"],81:[()=>gp('D',0),()=>tn[4]||"TBD"],82:[()=>gp('G',0),()=>tn[5]||"TBD"],83:[()=>gp('K',1),()=>gp('L',1)],84:[()=>gp('H',0),()=>gp('J',1)],85:[()=>gp('B',0),()=>tn[6]||"TBD"],86:[()=>gp('J',0),()=>gp('H',1)],87:[()=>gp('K',0),()=>tn[7]||"TBD"],88:[()=>gp('D',1),()=>gp('G',1)]};if(!map[n])return["TBD","TBD"];return[map[n][0](),map[n][1]()];}
+function r32T(n){if(realKO[n])return[realKO[n].h,realKO[n].a];const ths=allThirds(),tn=ths.map(t=>t.name),gp=(g,p)=>{const s=grpSt(g);return s[p]?s[p].name:"TBD";};const map={73:[()=>gp('A',1),()=>gp('B',1)],74:[()=>gp('E',0),()=>tn[0]||"TBD"],75:[()=>gp('F',0),()=>gp('C',1)],76:[()=>gp('C',0),()=>gp('F',1)],77:[()=>gp('I',0),()=>tn[1]||"TBD"],78:[()=>gp('E',1),()=>gp('I',1)],79:[()=>gp('A',0),()=>tn[2]||"TBD"],80:[()=>gp('L',0),()=>tn[3]||"TBD"],81:[()=>gp('D',0),()=>tn[4]||"TBD"],82:[()=>gp('G',0),()=>tn[5]||"TBD"],83:[()=>gp('K',1),()=>gp('L',1)],84:[()=>gp('H',0),()=>gp('J',1)],85:[()=>gp('B',0),()=>tn[6]||"TBD"],86:[()=>gp('J',0),()=>gp('H',1)],87:[()=>gp('K',0),()=>tn[7]||"TBD"],88:[()=>gp('D',1),()=>gp('G',1)]};if(!map[n])return["TBD","TBD"];return[map[n][0](),map[n][1]()];}
 function W(n){const r=res[n];if(!r)return"TBD";let ts;if(n>=73&&n<=88)ts=r32T(n);else ts=koPair(n);if(!ts||ts[0]==="TBD"||ts[1]==="TBD")return"TBD";if(r.hg>r.ag)return ts[0];if(r.ag>r.hg)return ts[1];return r.pen==='h'?ts[0]:ts[1];}
 function Ls(n){const r=res[n];if(!r)return"TBD";let ts;if(n>=73&&n<=88)ts=r32T(n);else ts=koPair(n);if(!ts)return"TBD";const w=W(n);return ts[0]===w?ts[1]:ts[0];}
 const PAIR={89:[74,77],90:[73,75],91:[79,80],92:[76,78],93:[83,84],94:[81,82],95:[86,88],96:[85,87],97:[89,90],98:[93,94],99:[95,96],100:[91,92],101:[97,98],102:[99,100],104:[101,102]};
-function koPair(n){if(n===103)return[Ls(101),Ls(102)];if(!PAIR[n])return["TBD","TBD"];return[W(PAIR[n][0]),W(PAIR[n][1])];}
+function koPair(n){if(realKO[n])return[realKO[n].h,realKO[n].a];if(n===103)return[Ls(101),Ls(102)];if(!PAIR[n])return["TBD","TBD"];return[W(PAIR[n][0]),W(PAIR[n][1])];}
 function simKO(n){let ts;if(n>=73&&n<=88)ts=r32T(n);else ts=koPair(n);if(ts[0]==="TBD"||ts[1]==="TBD")return;res[n]=sim(ts[0],ts[1],true);}
 function simAll(){GM.forEach(m=>{if(!res[m.n])res[m.n]=sim(m.h,m.a);});R32.forEach(m=>{if(!res[m.n])simKO(m.n);});R16.forEach(m=>{if(!res[m.n])simKO(m.n);});QF.forEach(m=>{if(!res[m.n])simKO(m.n);});SF.forEach(m=>{if(!res[m.n])simKO(m.n);});if(!res[103])simKO(103);if(!res[104])simKO(104);render();if(res[104])showChamp();}
 function simPhase(){if(tab==='groups'||tab.startsWith('group-'))GM.forEach(m=>{if(!res[m.n])res[m.n]=sim(m.h,m.a);});else if(tab==='r32')R32.forEach(m=>{if(!res[m.n])simKO(m.n);});else if(tab==='r16')R16.forEach(m=>{if(!res[m.n])simKO(m.n);});else if(tab==='qf')QF.forEach(m=>{if(!res[m.n])simKO(m.n);});else if(tab==='sf')SF.forEach(m=>{if(!res[m.n])simKO(m.n);});else if(tab==='final'){if(!res[103])simKO(103);if(!res[104])simKO(104);}render();if(res[104]&&tab==='final')showChamp();}
-function resetAll(){res={};pendPen={};document.getElementById('champOverlay').innerHTML='';document.querySelectorAll('.confetti').forEach(e=>e.remove());render();}
+function resetAll(){res={};pendPen={};realKO={};document.getElementById('champOverlay').innerHTML='';document.querySelectorAll('.confetti').forEach(e=>e.remove());render();}
 function confirmSc(n,ko){const h=document.getElementById('hg-'+n),a=document.getElementById('ag-'+n);if(!h||!a)return;const hg=parseInt(h.value)||0,ag=parseInt(a.value)||0;if(ko&&hg===ag){const p=document.getElementById('pen-'+n);if(p){p.classList.remove('hid');pendPen[n]={hg,ag};}return;}res[n]={hg,ag,manual:true};render();if(n===104)showChamp();}
 function setPen(n,side){const p=pendPen[n];if(!p)return;res[n]={hg:p.hg,ag:p.ag,pen:side,manual:true};delete pendPen[n];render();if(n===104)showChamp();}
 function editM(n){delete res[n];if(n>=73)clearDown(n);render();}
