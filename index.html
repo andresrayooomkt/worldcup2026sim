@@ -248,6 +248,7 @@ async function loadReal(){
     // bracket cambió: descarta KO sim/manual viejos (basados en cruces erróneos); conserva los reales
     for(let k=73;k<=104;k++){if(res[k]&&!res[k].real)delete res[k];}
     render();
+    if(res[104]&&res[104].real)showChamp();                    // final real cargada → corona al campeón
     if(btn){btn.textContent=loaded?('✓ '+loaded+' reales'):'Sin partidos jugados aún';setTimeout(()=>{btn.textContent=lbl;},2600);}
     if(unmatched.length)console.warn('No mapeados ('+unmatched.length+'):',unmatched);
   }catch(e){                                                 // 5) manejo de errores
