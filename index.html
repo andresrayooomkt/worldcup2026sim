@@ -217,6 +217,12 @@ async function loadReal(){
     matches.forEach(m=>{
       // ===== KNOCKOUT: se unen por num (73-104), no por nombre. Grupos no tienen num. =====
       if(m.num){
+        // GUARD: valida que el bracket (PAIR) coincide con las referencias W## del feed oficial.
+        // Sólo compara cuando el feed aún expone placeholders (W74 vs W77); avisa si la topología diverge.
+        const rf=s=>{const t=/^W(\d+)$/.exec((s||'').trim());return t?+t[1]:null;};
+        const f1=rf(m.team1),f2=rf(m.team2),pr=PAIR[m.num];
+        if(f1&&f2&&pr&&[f1,f2].sort().join()!==pr.slice().sort().join())
+          console.warn('BRACKET MISMATCH M'+m.num+': feed=['+[f1,f2]+'] PAIR=['+pr+']');
         if(isPH(m.team1)||isPH(m.team2))return;              // equipos aún no definidos en la realidad
         const h=toSim(m.team1),a=toSim(m.team2);
         if(!h||!a)return;
@@ -266,7 +272,7 @@ function allThirds(){const th=[];Object.keys(G).forEach(g=>{const s=grpSt(g);if(
 function r32T(n){if(realKO[n])return[realKO[n].h,realKO[n].a];const ths=allThirds(),tn=ths.map(t=>t.name),gp=(g,p)=>{const s=grpSt(g);return s[p]?s[p].name:"TBD";};const map={73:[()=>gp('A',1),()=>gp('B',1)],74:[()=>gp('E',0),()=>tn[0]||"TBD"],75:[()=>gp('F',0),()=>gp('C',1)],76:[()=>gp('C',0),()=>gp('F',1)],77:[()=>gp('I',0),()=>tn[1]||"TBD"],78:[()=>gp('E',1),()=>gp('I',1)],79:[()=>gp('A',0),()=>tn[2]||"TBD"],80:[()=>gp('L',0),()=>tn[3]||"TBD"],81:[()=>gp('D',0),()=>tn[4]||"TBD"],82:[()=>gp('G',0),()=>tn[5]||"TBD"],83:[()=>gp('K',1),()=>gp('L',1)],84:[()=>gp('H',0),()=>gp('J',1)],85:[()=>gp('B',0),()=>tn[6]||"TBD"],86:[()=>gp('J',0),()=>gp('H',1)],87:[()=>gp('K',0),()=>tn[7]||"TBD"],88:[()=>gp('D',1),()=>gp('G',1)]};if(!map[n])return["TBD","TBD"];return[map[n][0](),map[n][1]()];}
 function W(n){const r=res[n];if(!r)return"TBD";let ts;if(n>=73&&n<=88)ts=r32T(n);else ts=koPair(n);if(!ts||ts[0]==="TBD"||ts[1]==="TBD")return"TBD";if(r.hg>r.ag)return ts[0];if(r.ag>r.hg)return ts[1];return r.pen==='h'?ts[0]:ts[1];}
 function Ls(n){const r=res[n];if(!r)return"TBD";let ts;if(n>=73&&n<=88)ts=r32T(n);else ts=koPair(n);if(!ts)return"TBD";const w=W(n);return ts[0]===w?ts[1]:ts[0];}
-const PAIR={89:[74,77],90:[73,75],91:[79,80],92:[76,78],93:[83,84],94:[81,82],95:[86,88],96:[85,87],97:[89,90],98:[93,94],99:[95,96],100:[91,92],101:[97,98],102:[99,100],104:[101,102]};
+const PAIR={89:[74,77],90:[73,75],91:[76,78],92:[79,80],93:[83,84],94:[81,82],95:[86,88],96:[85,87],97:[89,90],98:[93,94],99:[91,92],100:[95,96],101:[97,98],102:[99,100],104:[101,102]};
 function koPair(n){if(realKO[n])return[realKO[n].h,realKO[n].a];if(n===103)return[Ls(101),Ls(102)];if(!PAIR[n])return["TBD","TBD"];return[W(PAIR[n][0]),W(PAIR[n][1])];}
 function simKO(n){let ts;if(n>=73&&n<=88)ts=r32T(n);else ts=koPair(n);if(ts[0]==="TBD"||ts[1]==="TBD")return;res[n]=sim(ts[0],ts[1],true);}
 function simAll(){GM.forEach(m=>{if(!res[m.n])res[m.n]=sim(m.h,m.a);});R32.forEach(m=>{if(!res[m.n])simKO(m.n);});R16.forEach(m=>{if(!res[m.n])simKO(m.n);});QF.forEach(m=>{if(!res[m.n])simKO(m.n);});SF.forEach(m=>{if(!res[m.n])simKO(m.n);});if(!res[103])simKO(103);if(!res[104])simKO(104);render();if(res[104])showChamp();}
@@ -275,7 +281,7 @@ function resetAll(){res={};pendPen={};realKO={};document.getElementById('champOv
 function confirmSc(n,ko){const h=document.getElementById('hg-'+n),a=document.getElementById('ag-'+n);if(!h||!a)return;const hg=parseInt(h.value)||0,ag=parseInt(a.value)||0;if(ko&&hg===ag){const p=document.getElementById('pen-'+n);if(p){p.classList.remove('hid');pendPen[n]={hg,ag};}return;}res[n]={hg,ag,manual:true};render();if(n===104)showChamp();}
 function setPen(n,side){const p=pendPen[n];if(!p)return;res[n]={hg:p.hg,ag:p.ag,pen:side,manual:true};delete pendPen[n];render();if(n===104)showChamp();}
 function editM(n){delete res[n];if(n>=73)clearDown(n);render();}
-const DEPS={73:[90],74:[89],75:[90],76:[92],77:[89],78:[92],79:[91],80:[91],81:[94],82:[94],83:[93],84:[93],85:[96],86:[95],87:[96],88:[95],89:[97],90:[97],91:[100],92:[100],93:[98],94:[98],95:[99],96:[99],97:[101],98:[101],99:[102],100:[102],101:[103,104],102:[103,104]};
+const DEPS={73:[90],74:[89],75:[90],76:[91],77:[89],78:[91],79:[92],80:[92],81:[94],82:[94],83:[93],84:[93],85:[96],86:[95],87:[96],88:[95],89:[97],90:[97],91:[99],92:[99],93:[98],94:[98],95:[100],96:[100],97:[101],98:[101],99:[102],100:[102],101:[103,104],102:[103,104]};
 function clearDown(n){if(DEPS[n])DEPS[n].forEach(d=>{if(res[d]){delete res[d];clearDown(d);}});}
 function showChamp(){const ch=W(104);if(ch==="TBD")return;const ru=Ls(104);spawnConfetti();document.getElementById('champOverlay').innerHTML=`<div class="champ-overlay" onclick="if(event.target===this)closeChamp()"><div class="champ-box"><div class="champ-trophy">🏆</div><div style="margin:16px auto">${fiXL(ch)}</div><div class="champ-name">${ch}</div><div class="champ-sub">World Champion 2026</div><div style="color:var(--text-dim);font-size:.78rem;margin-top:12px">Final: ${ch} vs ${ru}</div><button class="sh-big" onclick="shareChamp('${ch}')">📤 Share My Prediction</button><br><button class="champ-close" onclick="closeChamp()">Close</button></div></div>`;}
 function closeChamp(){document.getElementById('champOverlay').innerHTML='';document.querySelectorAll('.confetti').forEach(e=>e.remove());}
