@@ -18,12 +18,10 @@ Simulador interactivo del Mundial 2026. Tres funciones:
 Además cargaba **resultados reales** del torneo desde un feed público, así que
 durante junio y julio funcionaba como bracket vivo, no solo como juguete.
 
-- **En línea:** worldcupsim2026.com — de [mes] a [mes] de 2026
+- **En línea:** worldcupsim2026.com — de mayo a agosto de 2026
 - **Alojado en:** Cloudflare Workers, desplegado desde este repo
-- **Monetización:** Google AdSense (IDs en el `<head>` de `index.html`)
-- **Analítica:** Google Analytics 4 (ID en el `<head>`)
-- **Tráfico:** [visitas totales — rellenar antes de borrar Cloudflare]
-- **Ingresos AdSense:** [monto, o "prácticamente cero"]
+- **Monetización:** Google AdSense — **nunca aprobado** (ver sección 6)
+- **Analítica:** Google Analytics 4 (ID en el `<head>` de `index.html`)
 
 ---
 
@@ -135,10 +133,16 @@ También lee `score.p` (penales), `score.et` (prórroga) y `score.ft` en ese
 orden de prioridad, e ignora placeholders tipo "W74" cuando el partido todavía
 no tiene equipos definidos.
 
-**Guard interesante:** compara las referencias `W##` del feed contra mi objeto
-`PAIR` y lanza un `console.warn('BRACKET MISMATCH')` si la topología del bracket
-oficial no coincide con la mía. Fue la forma de detectar que mis cruces estaban
-mal sin revisar 32 llaves a mano.
+**Guard de bracket:** compara las referencias `W##` del feed contra mi objeto
+`PAIR` y lanza un `console.warn('BRACKET MISMATCH')` si la topología oficial no
+coincide con la mía.
+
+> **Este guard atrapó un bug real en producción.** Ver el commit
+> *"Fix swapped R16/QF bracket feeders in PAIR and DEPS"* (julio 2026): los
+> alimentadores de octavos y cuartos estaban invertidos. Sin la validación
+> automática habría implicado revisar 32 llaves a mano, o peor, nunca
+> enterarse. Es el mejor argumento a favor de escribir validaciones baratas
+> contra una fuente externa de verdad.
 
 ---
 
@@ -149,7 +153,7 @@ mal sin revisar 32 llaves a mano.
   modo manual.
 - **La integración con openfootball.** Feed gratis, sin key, sin cuota, y el
   emparejamiento normalizado aguantó todo el torneo.
-- **El guard de bracket.** Validación barata que atrapa un error caro.
+- **El guard de bracket.** Validación barata que atrapó un error caro.
 - **Todo el andamiaje legal y de SEO.** Canonical, Open Graph, JSON-LD de
   `WebApplication`, sitemap, robots, `ads.txt`, páginas de privacy/terms/
   cookies, y el disclaimer de no afiliación con FIFA en el footer. Eso son
@@ -183,7 +187,53 @@ mal sin revisar 32 llaves a mano.
 
 ---
 
-## 6. Referencia: formato del Mundial
+## 6. Resultados reales del proyecto
+
+### Tráfico (25 may – 22 ago 2026)
+
+- **400 usuarios activos**, ~1,900 eventos
+- **Canales:** Direct 257 · Organic Social 179 · Organic Search 91 ·
+  Referral 8 · Unassigned 1
+- **Países:** US 100 · MX 85 · CO 21 · AR 17 · RU 17 · DE 14 · PE 12
+- **Páginas:** home 617 vistas. Todo el resto del sitio (about, blog, privacy,
+  terms, cookies, contact) sumó menos de 15 vistas.
+- **Forma de la curva:** un pico de ~230 usuarios en un solo día a finales de
+  mayo, y después casi nada durante junio y julio — justo cuando se jugaba el
+  Mundial.
+
+### Monetización
+
+**AdSense nunca aprobó el sitio.** Rechazo por *"contenido de bajo valor"* el
+12 de abril de 2026, es decir *antes* de que empezara el torneo. El `ads.txt`
+figuraba como "No encontrado". **Ingresos totales: $0.**
+
+### Las tres lecciones
+
+1. **El tráfico fue social, no de búsqueda.** Direct + Organic Social =
+   436 sesiones contra 91 de Organic Search. Todo el andamiaje de SEO
+   (canonical, JSON-LD, sitemap) apuntó al canal que menos aportó. Para un
+   producto de temporada es lógico: competir por "world cup 2026 simulator"
+   contra FIFA y ESPN no es viable. **La palanca real era que el usuario
+   compartiera su bracket** — y el botón de compartir ya existía, pero solo
+   generaba texto. Con una imagen generada del bracket habría sido otra cosa.
+
+2. **La falta de persistencia rompió el ciclo justo donde debía cerrarse.**
+   Llegaba gente por un link compartido, llenaba predicciones, y al recargar lo
+   perdía todo. Ninguna razón para volver. Eso explica el pico único seguido de
+   silencio, mejor que cualquier teoría sobre el contenido.
+
+3. **AdSense rechaza herramientas interactivas sin contenido editorial real.**
+   Las páginas de about/blog/privacy existían justo para pasar la revisión, y
+   no bastaron. Si el plan de monetización depende de AdSense, hay que resolver
+   la aprobación **meses antes** del evento y con contenido escrito de verdad —
+   o elegir otro modelo desde el principio.
+
+**Diagnóstico corto:** ninguna de las tres fallas fue técnica. Todas fueron de
+producto y de secuencia.
+
+---
+
+## 7. Referencia: formato del Mundial
 
 **2030 usa el mismo formato de 48 equipos que 2026**, así que la estructura de
 este proyecto sigue vigente:
@@ -200,13 +250,13 @@ hay que rehacerla completa.
 
 ---
 
-## 7. Si haces otro simulador
+## 8. Si haces otro simulador
 
 Sirve para Liga MX, Champions, Copa Oro, lo que sea. Ruta corta:
 
 **Copiar tal cual:** la estructura `PAIR`/`DEPS` para el bracket, `loadReal()`
-adaptado a otro feed, las páginas legales y todo el SEO, el CSS (es
-independiente del deporte).
+adaptado a otro feed, el guard de validación contra la fuente externa, las
+páginas legales y el CSS (es independiente del deporte).
 
 **Rehacer:** el motor `sim()` — con Poisson y ratings reales esta vez. Y meter
 persistencia desde el primer commit.
@@ -215,29 +265,12 @@ persistencia desde el primer commit.
 hardcodeadas para 48 equipos y 12 grupos. Una liga con liguilla no se parece en
 nada.
 
+**Priorizar distinto:** persistencia primero, flujo de compartir segundo,
+monetización resuelta *antes* de construir, SEO al final.
+
 **No olvidar:** los IDs de AdSense y Analytics están en el `<head>` de
 `index.html`. Reemplázalos o quítalos según el proyecto nuevo.
 
 ---
 
 *Archivado por Andrés Rosas — agosto 2026*
-
-Tráfico (25 may – 22 ago 2026): 400 usuarios, 1,900 eventos.
-Canales: Direct 257, Organic Social 179, Organic Search 91.
-Países: US 100, MX 85, CO 21, AR 17, RU 17, DE 14, PE 12.
-Páginas: home 617 vistas; el resto del sitio, menos de 15 en total.
-
-Lección: el tráfico fue social, no de búsqueda. Para un producto de
-temporada, competir en SEO contra medios grandes no es viable; la
-palanca real es que el usuario comparta su predicción. La próxima vez,
-invertir en el flujo de compartir (imagen generada del bracket, no solo
-texto) antes que en SEO.
-
-Monetización: AdSense NUNCA aprobó el sitio. Rechazo "contenido de bajo
-valor" el 12 abr 2026, antes del torneo. Ingresos: $0. El ads.txt
-tampoco fue detectado.
-
-Lección: AdSense rechaza herramientas interactivas sin contenido
-editorial sustancial. Si el plan de monetización es AdSense, hay que
-resolver la aprobación MESES antes del evento y con contenido real
-escrito, no páginas de trámite. O elegir otro modelo desde el inicio.
