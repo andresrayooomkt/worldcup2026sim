@@ -273,4 +273,6 @@ monetización resuelta *antes* de construir, SEO al final.
 
 ---
 
+Dominio vence 	Apr 1, 2027
+
 *Archivado por Andrés Rosas — agosto 2026*
